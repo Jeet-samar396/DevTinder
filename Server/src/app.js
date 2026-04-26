@@ -9,21 +9,10 @@ const cors = require("cors");
 require("dotenv").config();
 require("./utils/cronjob");
 
-// ================= CORS =================
-const allowedOrigins = [
-  "https://dev-tinder-gamma-vert.vercel.app",
-  "http://localhost:5173",
-];
-
+// ================= CORS (FINAL FIX) =================
 app.use(
   cors({
-    origin: function (origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("CORS not allowed"));
-      }
-    },
+    origin: true, // 🔥 allow all origins (Vercel friendly)
     credentials: true,
   })
 );
