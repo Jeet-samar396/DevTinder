@@ -23,7 +23,7 @@ function App() {
           {/* 🔐 PROTECTED ROUTES */}
           <Route path="/home" element={<Body />}>
             <Route index element={<Feed />} />
-            <Route path="/edit-profile" element={<EditProfile />} />
+            <Route path="edit-profile" element={<EditProfile />} />
             <Route path="profile" element={<Profile />} />
             <Route path="requests" element={<Requests />} />
             <Route path="connections" element={<Connections />} />
