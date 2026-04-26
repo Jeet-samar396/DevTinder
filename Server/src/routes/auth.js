@@ -10,8 +10,8 @@ const { userAuth } = require("../middlewares/auth");
 // ================= COOKIE CONFIG =================
 const COOKIE_OPTIONS = {
   httpOnly: true,
-  sameSite: "lax",
-  secure: false,
+  sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+  secure: process.env.NODE_ENV === "production", // 🔥 important
   path: "/",
   expires: new Date(Date.now() + 8 * 3600000),
 };
@@ -28,21 +28,17 @@ authRouter.post("/signup", upload.single("photo"), async (req, res) => {
     console.log("BODY:", req.body);
     console.log("FILE:", req.file);
 
-    // ✅ FIXED
     validateSignUpData(req.body);
 
     const { firstName, lastName, emailId, password } = req.body;
 
-    // 🔒 Check duplicate email
     const existingUser = await User.findOne({ emailId });
     if (existingUser) {
       return res.status(400).send("Email already exists");
     }
 
-    // 🔐 Hash password
     const passwordHash = await bcrypt.hash(password, 10);
 
-    // 📸 Photo URL
     const photoUrl = req.file
       ? `${BASE_URL}/uploads/${req.file.filename}`
       : "";
@@ -59,6 +55,7 @@ authRouter.post("/signup", upload.single("photo"), async (req, res) => {
 
     const token = await savedUser.getJWT();
 
+    // ✅ COOKIE SET
     res.cookie("token", token, COOKIE_OPTIONS);
 
     const userResponse = savedUser.toObject();
@@ -87,20 +84,19 @@ authRouter.post("/login", async (req, res) => {
     }
 
     const user = await User.findOne({ emailId });
-
     if (!user) {
       return res.status(400).send("Invalid credentials");
     }
 
     const isPasswordValid = await user.validatePassword(password);
-
     if (!isPasswordValid) {
       return res.status(400).send("Invalid credentials");
     }
 
     const token = await user.getJWT();
 
-    res.cookie("token", COOKIE_OPTIONS);
+    // 🔥 CRITICAL FIX
+    res.cookie("token", token, COOKIE_OPTIONS);
 
     const userResponse = user.toObject();
     delete userResponse.password;
