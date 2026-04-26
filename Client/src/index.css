@@ -2,14 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
-/* 🌌 GLOBAL BACKGROUND */
+/* RESET */
 body {
   margin: 0;
   padding: 0;
   font-family: sans-serif;
-  background: linear-gradient(135deg, #0f0f0f, #1a1a2e, #16213e);
   color: white;
+  background: transparent; /* 🔥 IMPORTANT */
 }
+
+/* PARTICLES BACKGROUND */
 #tsparticles {
   position: fixed;
   top: 0;
@@ -19,7 +21,7 @@ body {
   z-index: -1;
 }
 
-/* 🔥 SMOOTH SCROLL */
+/* SMOOTH SCROLL */
 * {
   scroll-behavior: smooth;
 }
