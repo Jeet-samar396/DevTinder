@@ -13,9 +13,9 @@ const Chat = () => {
   const user = useSelector((store) => store.user);
   const userId = user?._id;
 
-  const socketRef = useRef(null); // 🔥 important
+  const socketRef = useRef(null);
+  const messagesEndRef = useRef(null);
 
-  // ================= FETCH OLD MESSAGES =================
   const fetchChatMessages = async () => {
     try {
       const chat = await axios.get(BASE_URL + "/chat/" + targetUserId, {
@@ -25,6 +25,7 @@ const Chat = () => {
       const chatMessages = chat?.data?.messages.map((msg) => {
         const { senderId, text } = msg;
         return {
+          senderId: senderId?._id,
           firstName: senderId?.firstName,
           lastName: senderId?.lastName,
           text,
@@ -41,7 +42,6 @@ const Chat = () => {
     fetchChatMessages();
   }, []);
 
-  // ================= SOCKET =================
   useEffect(() => {
     if (!userId) return;
 
@@ -54,16 +54,17 @@ const Chat = () => {
       targetUserId,
     });
 
-    socket.on("messageReceived", ({ firstName, lastName, text }) => {
-      setMessages((prev) => [...prev, { firstName, lastName, text }]);
+    socket.on("messageReceived", (msg) => {
+      setMessages((prev) => [...prev, msg]);
     });
 
-    return () => {
-      socket.disconnect();
-    };
+    return () => socket.disconnect();
   }, [userId, targetUserId]);
 
-  // ================= SEND MESSAGE =================
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
   const sendMessage = () => {
     if (!newMessage.trim()) return;
 
@@ -78,6 +79,7 @@ const Chat = () => {
     setMessages((prev) => [
       ...prev,
       {
+        senderId: userId,
         firstName: user.firstName,
         lastName: user.lastName,
         text: newMessage,
@@ -89,18 +91,15 @@ const Chat = () => {
 
   return (
     <div className="w-3/4 mx-auto border border-gray-600 m-5 h-[70vh] flex flex-col">
-      <h1 className="p-5 border-b border-gray-600">Chat</h1>
+      <h1 className="p-5 border-b border-gray-600 font-bold">Chat</h1>
 
-      {/* MESSAGES */}
       <div className="flex-1 overflow-scroll p-5">
-        {messages.map((msg, index) => (
+        {messages.map((msg, i) => (
           <div
-            key={index}
+            key={i}
             className={
               "chat " +
-              (user.firstName === msg.firstName
-                ? "chat-end"
-                : "chat-start")
+              (msg.senderId === userId ? "chat-end" : "chat-start")
             }
           >
             <div className="chat-header">
@@ -109,13 +108,14 @@ const Chat = () => {
             <div className="chat-bubble">{msg.text}</div>
           </div>
         ))}
+        <div ref={messagesEndRef}></div>
       </div>
 
-      {/* INPUT */}
-      <div className="p-5 border-t border-gray-600 flex items-center gap-2">
+      <div className="p-5 border-t border-gray-600 flex gap-2">
         <input
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && sendMessage()}
           className="flex-1 border border-gray-500 text-white rounded p-2"
         />
         <button onClick={sendMessage} className="btn btn-secondary">

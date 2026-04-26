@@ -21,63 +21,42 @@ const initializeSocket = (server) => {
   });
 
   io.on("connection", (socket) => {
-    console.log("🔌 New socket connected:", socket.id);
-
-    // ================= JOIN CHAT =================
-    socket.on("joinChat", ({ firstName, userId, targetUserId }) => {
+    socket.on("joinChat", ({ userId, targetUserId }) => {
       const roomId = getSecretRoomId(userId, targetUserId);
-
       socket.join(roomId);
-
-      console.log(`${firstName} joined room: ${roomId}`);
     });
 
-    // ================= SEND MESSAGE =================
-    socket.on(
-      "sendMessage",
-      async ({ firstName, lastName, userId, targetUserId, text }) => {
-        try {
-          if (!text?.trim()) return;
+    socket.on("sendMessage", async (data) => {
+      try {
+        const { firstName, lastName, userId, targetUserId, text } = data;
+        if (!text?.trim()) return;
 
-          const roomId = getSecretRoomId(userId, targetUserId);
+        const roomId = getSecretRoomId(userId, targetUserId);
 
-          // 🔥 Find existing chat
-          let chat = await Chat.findOne({
-            participants: { $all: [userId, targetUserId] },
+        let chat = await Chat.findOne({
+          participants: { $all: [userId, targetUserId] },
+        });
+
+        if (!chat) {
+          chat = new Chat({
+            participants: [userId, targetUserId],
+            messages: [],
           });
-
-          // 🔥 Create new chat if not exists
-          if (!chat) {
-            chat = new Chat({
-              participants: [userId, targetUserId],
-              messages: [],
-            });
-          }
-
-          // 🔥 Save message
-          chat.messages.push({
-            senderId: userId,
-            text,
-          });
-
-          await chat.save();
-
-          // 🔥 Emit to both users in room
-          io.to(roomId).emit("messageReceived", {
-            firstName,
-            lastName,
-            text,
-          });
-
-        } catch (err) {
-          console.error("❌ Socket Error:", err.message);
         }
-      }
-    );
 
-    // ================= DISCONNECT =================
-    socket.on("disconnect", () => {
-      console.log("❌ Socket disconnected:", socket.id);
+        chat.messages.push({ senderId: userId, text });
+        await chat.save();
+
+        io.to(roomId).emit("messageReceived", {
+          senderId: userId,
+          firstName,
+          lastName,
+          text,
+        });
+
+      } catch (err) {
+        console.error(err);
+      }
     });
   });
 };

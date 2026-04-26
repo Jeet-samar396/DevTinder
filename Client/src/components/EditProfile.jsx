@@ -5,6 +5,17 @@ import api from "../utils/api";
 import { useNavigate } from "react-router-dom";
 import UserCard from "./UserCard";
 
+const SKILL_OPTIONS = [
+  "JavaScript",
+  "React",
+  "Node.js",
+  "MongoDB",
+  "Express",
+  "C++",
+  "Python",
+  "Java",
+];
+
 const EditProfile = () => {
   const user = useSelector((store) => store.user);
   const dispatch = useDispatch();
@@ -34,7 +45,6 @@ const EditProfile = () => {
     }
   }, [user]);
 
-  // 🔥 Preview fix
   const previewUrl = photo ? URL.createObjectURL(photo) : photoUrl;
 
   const handleSave = async () => {
@@ -68,6 +78,16 @@ const EditProfile = () => {
     }
   };
 
+  const addSkill = (skill) => {
+    if (!skills.includes(skill)) {
+      setSkills([...skills, skill]);
+    }
+  };
+
+  const removeSkill = (skill) => {
+    setSkills(skills.filter((s) => s !== skill));
+  };
+
   if (!user) return null;
 
   return (
@@ -95,7 +115,6 @@ const EditProfile = () => {
           onChange={(e) => setLastName(e.target.value)}
         />
 
-        {/* 🔥 FILE UPLOAD */}
         <input
           type="file"
           className="input input-bordered my-2"
@@ -128,27 +147,39 @@ const EditProfile = () => {
           onChange={(e) => setAbout(e.target.value)}
         />
 
-        {/* 🔥 SKILLS MULTI SELECT */}
-        <select
-          className="select select-bordered my-2 h-32"
-          multiple
-          value={skills}
-          onChange={(e) => {
-            const selected = Array.from(e.target.selectedOptions).map(
-              (opt) => opt.value
-            );
-            setSkills(selected);
-          }}
-        >
-          <option value="JavaScript">JavaScript</option>
-          <option value="React">React</option>
-          <option value="Node.js">Node.js</option>
-          <option value="MongoDB">MongoDB</option>
-          <option value="Express">Express</option>
-          <option value="C++">C++</option>
-          <option value="Python">Python</option>
-          <option value="Java">Java</option>
-        </select>
+        {/* 🔥 SKILLS DROPDOWN + CHIPS */}
+        <div className="my-3">
+          <label className="text-sm">Select Skills</label>
+
+          <select
+            className="select select-bordered w-full mt-1"
+            onChange={(e) => addSkill(e.target.value)}
+          >
+            <option value="">Select skill</option>
+            {SKILL_OPTIONS.map((skill) => (
+              <option key={skill} value={skill}>
+                {skill}
+              </option>
+            ))}
+          </select>
+
+          <div className="flex flex-wrap gap-2 mt-2">
+            {skills.map((skill) => (
+              <div
+                key={skill}
+                className="bg-purple-600 px-3 py-1 rounded-full text-sm flex items-center gap-2"
+              >
+                {skill}
+                <span
+                  className="cursor-pointer"
+                  onClick={() => removeSkill(skill)}
+                >
+                  ✕
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
 
         {error && <p className="text-red-500 text-center">{error}</p>}
         {success && <p className="text-green-500 text-center">{success}</p>}
