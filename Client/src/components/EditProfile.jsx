@@ -12,6 +12,7 @@ const EditProfile = () => {
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
+  const [photo, setPhoto] = useState(null); // 🔥 changed
   const [photoUrl, setPhotoUrl] = useState("");
   const [age, setAge] = useState("");
   const [gender, setGender] = useState("");
@@ -33,43 +34,27 @@ const EditProfile = () => {
     }
   }, [user]);
 
-  // 🔥 VALIDATION
-  const validate = () => {
-    if (!firstName || firstName.length < 3) {
-      return "First name must be at least 3 characters";
-    }
-
-    if (age && age < 18) {
-      return "Age must be 18+";
-    }
-
-    if (gender && !["male", "female", "other"].includes(gender.toLowerCase())) {
-      return "Invalid gender";
-    }
-
-    return null;
-  };
-
   const handleSave = async () => {
-    const validationError = validate();
-    if (validationError) {
-      setError(validationError);
-      return;
-    }
-
     try {
       setError("");
       setSuccess("");
 
-      const res = await api.patch("/profile/edit", {
-        firstName,
-        lastName,
-        photoUrl,
-        age,
-        gender,
-        about,
-        skills: skills.split(",").map((s) => s.trim()),
-      });
+      const formData = new FormData();
+      formData.append("firstName", firstName);
+      formData.append("lastName", lastName);
+      formData.append("age", age);
+      formData.append("gender", gender);
+      formData.append("about", about);
+      formData.append(
+        "skills",
+        JSON.stringify(skills.split(",").map((s) => s.trim()))
+      );
+
+      if (photo) {
+        formData.append("photo", photo);
+      }
+
+      const res = await api.patch("/profile/edit", formData);
 
       dispatch(addUser(res.data.data));
       setSuccess("Profile updated successfully!");
@@ -83,14 +68,11 @@ const EditProfile = () => {
     }
   };
 
-  if (!user) {
-    return <div className="text-center mt-10 text-white">Loading...</div>;
-  }
+  if (!user) return null;
 
   return (
     <div className="flex flex-col md:flex-row justify-center my-10 gap-10 px-4">
 
-      {/* FORM */}
       <div className="card bg-base-300 w-full max-w-md p-5">
         <h2 className="text-xl font-bold text-center mb-4">
           Edit Profile
@@ -112,12 +94,11 @@ const EditProfile = () => {
           onChange={(e) => setLastName(e.target.value)}
         />
 
+        {/* 🔥 FILE UPLOAD */}
         <input
-          type="text"
-          placeholder="Photo URL"
+          type="file"
           className="input input-bordered my-2"
-          value={photoUrl}
-          onChange={(e) => setPhotoUrl(e.target.value)}
+          onChange={(e) => setPhoto(e.target.files[0])}
         />
 
         <input
@@ -154,20 +135,15 @@ const EditProfile = () => {
           onChange={(e) => setSkills(e.target.value)}
         />
 
-        {error && (
-          <p className="text-red-500 text-center text-sm">{error}</p>
-        )}
-
-        {success && (
-          <p className="text-green-500 text-center text-sm">{success}</p>
-        )}
+        {error && <p className="text-red-500 text-center">{error}</p>}
+        {success && <p className="text-green-500 text-center">{success}</p>}
 
         <button className="btn btn-primary mt-3" onClick={handleSave}>
           Save Profile
         </button>
       </div>
 
-      {/* LIVE PREVIEW */}
+      {/* PREVIEW */}
       <UserCard
         user={{
           firstName,
@@ -176,6 +152,7 @@ const EditProfile = () => {
           age,
           gender,
           about,
+          skills: skills.split(","),
         }}
       />
     </div>
