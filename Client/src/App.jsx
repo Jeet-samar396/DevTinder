@@ -11,17 +11,13 @@ import Connections from "./components/Connections";
 import Chat from "./components/Chat";
 import EditProfile from "./components/EditProfile";
 
-// 🔥 ADD THIS
-import BackgroundAnimation from "./components/BackgroundAnimation";
 
 function App() {
   return (
     <Provider store={appStore}>
       <BrowserRouter>
 
-        {/* 🔥 BACKGROUND (GLOBAL) */}
-        <BackgroundAnimation />
-
+        
         <Routes>
 
           {/* 🔓 PUBLIC */}

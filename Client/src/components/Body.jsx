@@ -27,7 +27,6 @@ const Body = () => {
         if (err?.response?.status === 401) {
           navigate("/");
         }
-        console.error(err);
       } finally {
         setLoading(false);
       }
@@ -45,23 +44,12 @@ const Body = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col relative text-white">
-
-      {/* 🔥 TRANSPARENT OVERLAY GRADIENT */}
-      <div className="absolute inset-0 bg-gradient-to-br from-black/80 via-gray-900/70 to-purple-900/60 z-0"></div>
-
-      {/* 🔥 CONTENT ABOVE EVERYTHING */}
-      <div className="relative z-10 flex flex-col min-h-screen">
-
-        <NavBar />
-
-        <div className="flex-1 px-4 md:px-10 py-6">
-          <Outlet />
-        </div>
-
-        <Footer />
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-black via-gray-900 to-purple-900 text-white">
+      <NavBar />
+      <div className="flex-1 px-4 md:px-10 py-6">
+        <Outlet />
       </div>
-
+      <Footer />
     </div>
   );
 };
