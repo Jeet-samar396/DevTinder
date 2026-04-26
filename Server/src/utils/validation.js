@@ -1,22 +1,26 @@
 const validator = require("validator");
 
-// ✅ FIXED: now accepts data directly (NOT req)
+// ================= SIGNUP VALIDATION =================
 const validateSignUpData = (data) => {
   const { firstName, lastName, emailId, password } = data;
 
-  if (!firstName || firstName.length < 4) {
-    throw new Error("First name must be at least 4 characters");
+  // First Name
+  if (!firstName || firstName.trim().length < 3) {
+    throw new Error("First name must be at least 3 characters");
   }
 
+  // Email
   if (!emailId || !validator.isEmail(emailId)) {
-    throw new Error("Email is not valid!");
+    throw new Error("Invalid email address");
   }
 
-  if (!password || !validator.isStrongPassword(password)) {
-    throw new Error("Please enter a strong Password!");
+  // Password (🔥 simplified rule)
+  if (!password || password.length < 6) {
+    throw new Error("Password must be at least 6 characters long");
   }
 };
 
+// ================= EDIT PROFILE VALIDATION =================
 const validateEditProfileData = (req) => {
   const allowedEditFields = [
     "firstName",
@@ -29,11 +33,9 @@ const validateEditProfileData = (req) => {
     "skills",
   ];
 
-  const isEditAllowed = Object.keys(req.body).every((field) =>
+  return Object.keys(req.body).every((field) =>
     allowedEditFields.includes(field)
   );
-
-  return isEditAllowed;
 };
 
 module.exports = {
