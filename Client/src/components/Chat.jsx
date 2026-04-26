@@ -85,7 +85,8 @@ const Chat = () => {
   };
 
   return (
-    <div className="w-full h-screen flex flex-col bg-black text-white">
+  <div className="flex justify-center mt-6">
+    <div className="w-full max-w-2xl h-[70vh] flex flex-col border border-gray-700 rounded-xl bg-black">
 
       <div className="p-4 border-b border-gray-700 text-center font-bold">
         Chat
@@ -118,17 +119,19 @@ const Chat = () => {
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-          className="flex-1 bg-gray-800 text-white rounded-lg px-3 py-2 outline-none"
+          className="flex-1 bg-gray-800 text-white rounded px-3 py-2"
         />
         <button
           onClick={sendMessage}
-          className="bg-purple-600 px-4 py-2 rounded-lg"
+          className="bg-purple-600 px-4 py-2 rounded"
         >
           Send
         </button>
       </div>
+
     </div>
-  );
+  </div>
+);
 };
 
 export default Chat;

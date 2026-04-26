@@ -1,7 +1,8 @@
 import { io } from "socket.io-client";
+import { BASE_URL } from "./constants";
 
 export const createSocketConnection = () => {
-  return io("https://devtinder-ksq6.onrender.com", {
+  return io(BASE_URL, {
     withCredentials: true,
   });
 };

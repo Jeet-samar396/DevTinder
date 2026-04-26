@@ -37,7 +37,7 @@ const Body = () => {
 
   if (loading) {
     return (
-      <div className="h-screen flex items-center justify-center text-white text-xl">
+      <div className="h-screen flex items-center justify-center text-white">
         Loading...
       </div>
     );
@@ -46,9 +46,11 @@ const Body = () => {
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-black via-gray-900 to-purple-900 text-white">
       <NavBar />
+
       <div className="flex-1 px-4 md:px-10 py-6">
         <Outlet />
       </div>
+
       <Footer />
     </div>
   );
