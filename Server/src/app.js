@@ -9,19 +9,30 @@ const cors = require("cors");
 require("dotenv").config();
 require("./utils/cronjob");
 
-// ================= MIDDLEWARE =================
+// ================= CORS =================
+const allowedOrigins = [
+  "https://dev-tinder-gamma-vert.vercel.app",
+  "http://localhost:5173",
+];
+
 app.use(
   cors({
-    origin: "https://dev-tinder-gamma-vert.vercel.app",
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("CORS not allowed"));
+      }
+    },
     credentials: true,
   })
 );
-app.options("*", cors());
 
+// ================= MIDDLEWARE =================
 app.use(express.json());
 app.use(cookieParser());
 
-// static files
+// ================= STATIC =================
 app.use("/uploads", express.static("uploads"));
 
 // ================= ROUTES =================
@@ -40,6 +51,12 @@ app.use("/profile", profileRouter);
 app.use("/request", requestRouter);
 app.use("/user", userRouter);
 app.use("/chat", chatRouter);
+
+// ================= ERROR HANDLER =================
+app.use((err, req, res, next) => {
+  console.error("GLOBAL ERROR:", err.stack);
+  res.status(500).send(err.message || "Something broke!");
+});
 
 // ================= SOCKET =================
 const initializeSocket = require("./utils/socket");
