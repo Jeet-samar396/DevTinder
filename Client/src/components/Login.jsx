@@ -11,7 +11,9 @@ const Login = () => {
   const [lastName, setLastName] = useState("");
   const [photo, setPhoto] = useState(null);
   const [isLoginForm, setIsLoginForm] = useState(true);
+
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState(""); // 🔥 NEW
   const [loading, setLoading] = useState(false);
 
   const dispatch = useDispatch();
@@ -19,10 +21,11 @@ const Login = () => {
 
   // ================= LOGIN =================
   const handleLogin = async (e) => {
-    e.preventDefault(); // 🔥 FIX (prevents reload)
+    e.preventDefault();
 
     try {
       setError("");
+      setSuccess("");
       setLoading(true);
 
       const res = await api.post("/auth/login", {
@@ -30,19 +33,16 @@ const Login = () => {
         password,
       });
 
-      console.log("LOGIN SUCCESS:", res.data);
-
       const user = res.data;
       dispatch(addUser(user));
 
       if (!user.age || !user.gender) {
-        navigate("/home/edit-profile"); // 🔥 FIXED route
+        navigate("/home/edit-profile");
       } else {
         navigate("/home");
       }
 
     } catch (err) {
-      console.error("LOGIN ERROR:", err);
       setError(err?.response?.data || "Login failed");
     } finally {
       setLoading(false);
@@ -51,36 +51,47 @@ const Login = () => {
 
   // ================= SIGNUP =================
   const handleSignUp = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  try {
-    setError("");
-    setLoading(true);
+    try {
+      setError("");
+      setSuccess("");
+      setLoading(true);
 
-    const formData = new FormData();
-    formData.append("firstName", firstName);
-    formData.append("lastName", lastName);
-    formData.append("emailId", emailId);
-    formData.append("password", password);
+      const formData = new FormData();
+      formData.append("firstName", firstName);
+      formData.append("lastName", lastName);
+      formData.append("emailId", emailId);
+      formData.append("password", password);
 
-    if (photo) {
-      formData.append("photo", photo);
+      if (photo) {
+        formData.append("photo", photo);
+      }
+
+      const res = await api.post("/auth/signup", formData);
+
+      console.log("SIGNUP RESPONSE:", res.data);
+
+      // 🔥 IMPORTANT
+      setSuccess("Signup successful! Please login.");
+
+      // 👉 form clear
+      setFirstName("");
+      setLastName("");
+      setEmailId("");
+      setPassword("");
+      setPhoto(null);
+
+      // 👉 switch to login view
+      setIsLoginForm(true);
+
+    } catch (err) {
+      setError(err?.response?.data || "Signup failed");
+    } finally {
+      setLoading(false);
     }
+  };
 
-    const res = await api.post("/auth/signup", formData);
-
-    const user = res.data.data;
-    dispatch(addUser(user));
-
-    // 🔥 CHANGE HERE
-    navigate("/"); 
-
-  } catch (err) {
-    setError(err?.response?.data || "Signup failed");
-  } finally {
-    setLoading(false);
-  }
-};
   return (
     <div className="flex justify-center items-center min-h-screen px-4">
       <form
@@ -91,6 +102,7 @@ const Login = () => {
           {isLoginForm ? "Login" : "Sign Up"}
         </h2>
 
+        {/* SIGNUP FIELDS */}
         {!isLoginForm && (
           <>
             <input
@@ -119,6 +131,7 @@ const Login = () => {
           </>
         )}
 
+        {/* EMAIL */}
         <input
           type="email"
           placeholder="Email"
@@ -128,6 +141,7 @@ const Login = () => {
           required
         />
 
+        {/* PASSWORD */}
         <input
           type="password"
           placeholder="Password"
@@ -137,10 +151,17 @@ const Login = () => {
           required
         />
 
+        {/* ERROR */}
         {error && (
           <p className="text-red-400 text-sm text-center mb-2">{error}</p>
         )}
 
+        {/* SUCCESS */}
+        {success && (
+          <p className="text-green-400 text-sm text-center mb-2">{success}</p>
+        )}
+
+        {/* BUTTON */}
         <button
           type="submit"
           disabled={loading}
@@ -153,19 +174,19 @@ const Login = () => {
             : "Sign Up"}
         </button>
 
+        {/* TOGGLE */}
         <p
-          onClick={() => setIsLoginForm((prev) => !prev)}
+          onClick={() => {
+            setIsLoginForm((prev) => !prev);
+            setError("");
+            setSuccess("");
+          }}
           className="text-center mt-4 text-sm cursor-pointer opacity-80 hover:text-purple-400"
         >
           {isLoginForm
             ? "New user? Sign up"
             : "Already have an account? Login"}
         </p>
-
-        <div className="flex justify-center gap-6 mt-5 text-xl">
-          <a href="https://github.com/Jeet-samar396" target="_blank">🐙</a>
-          <a href="https://www.linkedin.com/in/jeetsamar03/" target="_blank">💼</a>
-        </div>
 
         <p className="text-center text-xs mt-2 opacity-60">
           Created by Samarjeet Singh
