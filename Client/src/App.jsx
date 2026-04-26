@@ -19,7 +19,6 @@ function App() {
 
           {/* 🔓 PUBLIC ROUTES */}
           <Route path="/" element={<Login />} />
-          <Route path="/edit-profile" element={<EditProfile />} />
 
           {/* 🔐 PROTECTED ROUTES */}
           <Route path="/home" element={<Body />}>
