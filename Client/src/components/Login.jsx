@@ -51,39 +51,36 @@ const Login = () => {
 
   // ================= SIGNUP =================
   const handleSignUp = async (e) => {
-    e.preventDefault(); // 🔥 FIX
+  e.preventDefault();
 
-    try {
-      setError("");
-      setLoading(true);
+  try {
+    setError("");
+    setLoading(true);
 
-      const formData = new FormData();
-      formData.append("firstName", firstName);
-      formData.append("lastName", lastName);
-      formData.append("emailId", emailId);
-      formData.append("password", password);
+    const formData = new FormData();
+    formData.append("firstName", firstName);
+    formData.append("lastName", lastName);
+    formData.append("emailId", emailId);
+    formData.append("password", password);
 
-      if (photo) {
-        formData.append("photo", photo);
-      }
-
-      const res = await api.post("/auth/signup", formData);
-
-      console.log("SIGNUP SUCCESS:", res.data);
-
-      const user = res.data.data;
-      dispatch(addUser(user));
-
-      navigate("/home/edit-profile");
-
-    } catch (err) {
-      console.error("SIGNUP ERROR:", err);
-      setError(err?.response?.data || "Signup failed");
-    } finally {
-      setLoading(false);
+    if (photo) {
+      formData.append("photo", photo);
     }
-  };
 
+    const res = await api.post("/auth/signup", formData);
+
+    const user = res.data.data;
+    dispatch(addUser(user));
+
+    // 🔥 CHANGE HERE
+    navigate("/"); 
+
+  } catch (err) {
+    setError(err?.response?.data || "Signup failed");
+  } finally {
+    setLoading(false);
+  }
+};
   return (
     <div className="flex justify-center items-center min-h-screen px-4">
       <form
