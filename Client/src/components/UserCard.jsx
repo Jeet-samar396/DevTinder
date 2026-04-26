@@ -9,7 +9,16 @@ const UserCard = ({ user }) => {
 
   if (!user) return null;
 
-  const { _id, firstName, lastName, photoUrl, age, gender, about } = user;
+  const {
+    _id,
+    firstName,
+    lastName,
+    photoUrl,
+    age,
+    gender,
+    about,
+    skills, // 🔥 ADD THIS
+  } = user;
 
   const handleSendRequest = async (status) => {
     try {
@@ -46,6 +55,20 @@ const UserCard = ({ user }) => {
           )}
 
           <p className="text-sm opacity-70 mt-2">{about}</p>
+
+          {/* 🔥 SKILLS SECTION */}
+          {skills && skills.length > 0 && (
+            <div className="mt-3 flex flex-wrap gap-2">
+              {skills.map((skill, index) => (
+                <span
+                  key={index}
+                  className="px-2 py-1 bg-purple-600 text-white text-xs rounded-full"
+                >
+                  {skill}
+                </span>
+              ))}
+            </div>
+          )}
 
           {/* BUTTONS */}
           <div className="flex justify-between mt-6">

@@ -16,9 +16,11 @@ const EditProfile = () => {
   const [age, setAge] = useState("");
   const [gender, setGender] = useState("");
   const [about, setAbout] = useState("");
-  const [error, setError] = useState("");
+  const [skills, setSkills] = useState("");
 
-  // 🔥 FIX: wait for user
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+
   useEffect(() => {
     if (user) {
       setFirstName(user.firstName || "");
@@ -27,12 +29,37 @@ const EditProfile = () => {
       setAge(user.age || "");
       setGender(user.gender || "");
       setAbout(user.about || "");
+      setSkills(user.skills?.join(", ") || "");
     }
   }, [user]);
 
+  // 🔥 VALIDATION
+  const validate = () => {
+    if (!firstName || firstName.length < 3) {
+      return "First name must be at least 3 characters";
+    }
+
+    if (age && age < 18) {
+      return "Age must be 18+";
+    }
+
+    if (gender && !["male", "female", "other"].includes(gender.toLowerCase())) {
+      return "Invalid gender";
+    }
+
+    return null;
+  };
+
   const handleSave = async () => {
+    const validationError = validate();
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+
     try {
       setError("");
+      setSuccess("");
 
       const res = await api.patch("/profile/edit", {
         firstName,
@@ -41,29 +68,32 @@ const EditProfile = () => {
         age,
         gender,
         about,
+        skills: skills.split(",").map((s) => s.trim()),
       });
 
       dispatch(addUser(res.data.data));
+      setSuccess("Profile updated successfully!");
 
-      navigate("/home");
+      setTimeout(() => {
+        navigate("/home");
+      }, 1500);
+
     } catch (err) {
       setError(err.response?.data || "Error saving profile");
     }
   };
 
-  // 🔥 LOADING STATE (important)
   if (!user) {
-  return <div style={{ color: "white", textAlign: "center", marginTop: "50px" }}>
-    Loading profile...
-  </div>;
-}
+    return <div className="text-center mt-10 text-white">Loading...</div>;
+  }
 
   return (
-    <div className="flex justify-center my-10 gap-10">
+    <div className="flex flex-col md:flex-row justify-center my-10 gap-10 px-4">
+
       {/* FORM */}
-      <div className="card bg-base-300 w-96 p-5">
+      <div className="card bg-base-300 w-full max-w-md p-5">
         <h2 className="text-xl font-bold text-center mb-4">
-          Complete Profile
+          Edit Profile
         </h2>
 
         <input
@@ -98,13 +128,16 @@ const EditProfile = () => {
           onChange={(e) => setAge(e.target.value)}
         />
 
-        <input
-          type="text"
-          placeholder="Gender"
-          className="input input-bordered my-2"
+        <select
+          className="select select-bordered my-2"
           value={gender}
           onChange={(e) => setGender(e.target.value)}
-        />
+        >
+          <option value="">Select Gender</option>
+          <option value="male">Male</option>
+          <option value="female">Female</option>
+          <option value="other">Other</option>
+        </select>
 
         <textarea
           placeholder="About"
@@ -113,16 +146,37 @@ const EditProfile = () => {
           onChange={(e) => setAbout(e.target.value)}
         />
 
-        <p className="text-red-500 text-center">{error}</p>
+        <input
+          type="text"
+          placeholder="Skills (comma separated)"
+          className="input input-bordered my-2"
+          value={skills}
+          onChange={(e) => setSkills(e.target.value)}
+        />
+
+        {error && (
+          <p className="text-red-500 text-center text-sm">{error}</p>
+        )}
+
+        {success && (
+          <p className="text-green-500 text-center text-sm">{success}</p>
+        )}
 
         <button className="btn btn-primary mt-3" onClick={handleSave}>
           Save Profile
         </button>
       </div>
 
-      {/* PREVIEW */}
+      {/* LIVE PREVIEW */}
       <UserCard
-        user={{ firstName, lastName, photoUrl, age, gender, about }}
+        user={{
+          firstName,
+          lastName,
+          photoUrl,
+          age,
+          gender,
+          about,
+        }}
       />
     </div>
   );

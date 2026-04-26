@@ -68,7 +68,7 @@ const userSchema = new mongoose.Schema(
     ) {
       throw new Error("Invalid Photo URL: " + value);
     }
-  },
+},
 },
     about: {
       type: String,
@@ -76,6 +76,7 @@ const userSchema = new mongoose.Schema(
     },
     skills: {
       type: [String],
+      default: [],
     },
   },
   {
