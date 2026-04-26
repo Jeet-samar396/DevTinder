@@ -1,12 +1,18 @@
 const validator = require("validator");
 
-const validateSignUpData = (req) => {
-  const { firstName, lastName, emailId, password } = req.body;
-  if (!firstName || !lastName) {
-    throw new Error("Name is not valid!");
-  } else if (!validator.isEmail(emailId)) {
+// ✅ FIXED: now accepts data directly (NOT req)
+const validateSignUpData = (data) => {
+  const { firstName, lastName, emailId, password } = data;
+
+  if (!firstName || firstName.length < 4) {
+    throw new Error("First name must be at least 4 characters");
+  }
+
+  if (!emailId || !validator.isEmail(emailId)) {
     throw new Error("Email is not valid!");
-  } else if (!validator.isStrongPassword(password)) {
+  }
+
+  if (!password || !validator.isStrongPassword(password)) {
     throw new Error("Please enter a strong Password!");
   }
 };

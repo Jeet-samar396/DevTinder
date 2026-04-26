@@ -11,7 +11,7 @@ const { userAuth } = require("../middlewares/auth");
 const COOKIE_OPTIONS = {
   httpOnly: true,
   sameSite: "lax",
-  secure: false, // change to true in production (HTTPS)
+  secure: false,
   path: "/",
   expires: new Date(Date.now() + 8 * 3600000),
 };
@@ -28,14 +28,10 @@ authRouter.post("/signup", upload.single("photo"), async (req, res) => {
     console.log("BODY:", req.body);
     console.log("FILE:", req.file);
 
-    // ✅ FIXED validation
+    // ✅ FIXED
     validateSignUpData(req.body);
 
     const { firstName, lastName, emailId, password } = req.body;
-
-    if (!firstName || !emailId || !password) {
-      return res.status(400).send("Missing required fields");
-    }
 
     // 🔒 Check duplicate email
     const existingUser = await User.findOne({ emailId });
@@ -46,12 +42,11 @@ authRouter.post("/signup", upload.single("photo"), async (req, res) => {
     // 🔐 Hash password
     const passwordHash = await bcrypt.hash(password, 10);
 
-    // 📸 Handle photo safely
+    // 📸 Photo URL
     const photoUrl = req.file
       ? `${BASE_URL}/uploads/${req.file.filename}`
       : "";
 
-    // 👤 Create user
     const user = new User({
       firstName,
       lastName,
@@ -62,12 +57,10 @@ authRouter.post("/signup", upload.single("photo"), async (req, res) => {
 
     const savedUser = await user.save();
 
-    // 🎟️ Generate token
     const token = await savedUser.getJWT();
 
     res.cookie("token", token, COOKIE_OPTIONS);
 
-    // ❌ Remove password before sending
     const userResponse = savedUser.toObject();
     delete userResponse.password;
 
@@ -77,7 +70,7 @@ authRouter.post("/signup", upload.single("photo"), async (req, res) => {
     });
 
   } catch (err) {
-    console.error("SIGNUP ERROR:", err);
+    console.error("SIGNUP ERROR:", err.message);
     return res.status(500).send(err.message);
   }
 });
@@ -87,23 +80,27 @@ authRouter.post("/login", async (req, res) => {
   try {
     const { emailId, password } = req.body;
 
+    console.log("LOGIN BODY:", req.body);
+
     if (!emailId || !password) {
       return res.status(400).send("Missing credentials");
     }
 
     const user = await User.findOne({ emailId });
+
     if (!user) {
       return res.status(400).send("Invalid credentials");
     }
 
     const isPasswordValid = await user.validatePassword(password);
+
     if (!isPasswordValid) {
       return res.status(400).send("Invalid credentials");
     }
 
     const token = await user.getJWT();
 
-    res.cookie("token", token, COOKIE_OPTIONS);
+    res.cookie("token", COOKIE_OPTIONS);
 
     const userResponse = user.toObject();
     delete userResponse.password;
@@ -111,7 +108,7 @@ authRouter.post("/login", async (req, res) => {
     return res.json(userResponse);
 
   } catch (err) {
-    console.error("LOGIN ERROR:", err);
+    console.error("LOGIN ERROR:", err.message);
     return res.status(500).send(err.message);
   }
 });
