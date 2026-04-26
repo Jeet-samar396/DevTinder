@@ -90,38 +90,53 @@ const Chat = () => {
   };
 
   return (
-    <div className="w-3/4 mx-auto border border-gray-600 m-5 h-[70vh] flex flex-col">
-      <h1 className="p-5 border-b border-gray-600 font-bold">Chat</h1>
+    <div className="w-full h-screen flex flex-col bg-black text-white">
 
-      <div className="flex-1 overflow-scroll p-5">
+      {/* HEADER */}
+      <div className="p-4 border-b border-gray-700 text-center font-bold">
+        Chat
+      </div>
+
+      {/* MESSAGES */}
+      <div className="flex-1 overflow-y-auto p-3 space-y-2">
         {messages.map((msg, i) => (
           <div
             key={i}
-            className={
-              "chat " +
-              (msg.senderId === userId ? "chat-end" : "chat-start")
-            }
+            className={`flex ${
+              msg.senderId === userId ? "justify-end" : "justify-start"
+            }`}
           >
-            <div className="chat-header">
-              {msg.firstName} {msg.lastName}
+            <div
+              className={`px-3 py-2 rounded-lg max-w-[75%] text-sm ${
+                msg.senderId === userId
+                  ? "bg-purple-600"
+                  : "bg-gray-700"
+              }`}
+            >
+              {msg.text}
             </div>
-            <div className="chat-bubble">{msg.text}</div>
           </div>
         ))}
         <div ref={messagesEndRef}></div>
       </div>
 
-      <div className="p-5 border-t border-gray-600 flex gap-2">
+      {/* INPUT */}
+      <div className="p-3 border-t border-gray-700 flex gap-2">
         <input
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-          className="flex-1 border border-gray-500 text-white rounded p-2"
+          placeholder="Type a message..."
+          className="flex-1 bg-gray-800 text-white rounded-lg px-3 py-2 outline-none"
         />
-        <button onClick={sendMessage} className="btn btn-secondary">
+        <button
+          onClick={sendMessage}
+          className="bg-purple-600 px-4 py-2 rounded-lg"
+        >
           Send
         </button>
       </div>
+
     </div>
   );
 };

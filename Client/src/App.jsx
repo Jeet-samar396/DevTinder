@@ -11,10 +11,17 @@ import Connections from "./components/Connections";
 import Chat from "./components/Chat";
 import EditProfile from "./components/EditProfile";
 
+// 🔥 ADD THIS
+import BackgroundAnimation from "./components/BackgroundAnimation";
+
 function App() {
   return (
     <Provider store={appStore}>
       <BrowserRouter>
+
+        {/* 🔥 BACKGROUND (GLOBAL) */}
+        <BackgroundAnimation />
+
         <Routes>
 
           {/* 🔓 PUBLIC */}
@@ -23,23 +30,14 @@ function App() {
           {/* 🔐 PROTECTED */}
           <Route path="/home" element={<Body />}>
 
-            {/* DEFAULT → FEED */}
             <Route index element={<Feed />} />
-
-            {/* PROFILE VIEW */}
             <Route path="profile" element={<Profile />} />
-
-            {/* EDIT PROFILE */}
             <Route path="edit-profile" element={<EditProfile />} />
-
-            {/* OTHER FEATURES */}
             <Route path="requests" element={<Requests />} />
             <Route path="connections" element={<Connections />} />
             <Route path="chat/:targetUserId" element={<Chat />} />
 
-            {/* 🔁 UNKNOWN INSIDE /home */}
             <Route path="*" element={<Navigate to="/home" />} />
-
           </Route>
 
           {/* 🔁 GLOBAL FALLBACK */}
