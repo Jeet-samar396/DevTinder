@@ -12,13 +12,11 @@ require("./utils/cronjob");
 // ================= MIDDLEWARE =================
 app.use(
   cors({
-    origin: [
-      "http://localhost:5173", // local
-      process.env.CLIENT_URL,  // 🔥 production frontend (Vercel)
-    ],
+    origin: "https://dev-tinder-gamma-vert.vercel.app",
     credentials: true,
   })
 );
+app.options("*", cors());
 
 app.use(express.json());
 app.use(cookieParser());
