@@ -12,7 +12,10 @@ require("./utils/cronjob");
 // ================= MIDDLEWARE =================
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: [
+      "http://localhost:5173", // local
+      process.env.CLIENT_URL,  // 🔥 production frontend (Vercel)
+    ],
     credentials: true,
   })
 );
@@ -20,6 +23,7 @@ app.use(
 app.use(express.json());
 app.use(cookieParser());
 
+// static files
 app.use("/uploads", express.static("uploads"));
 
 // ================= ROUTES =================
@@ -34,7 +38,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/auth", authRouter);
-app.use("/profile", profileRouter); // 🔥 works with /view
+app.use("/profile", profileRouter);
 app.use("/request", requestRouter);
 app.use("/user", userRouter);
 app.use("/chat", chatRouter);
@@ -48,8 +52,9 @@ initializeSocket(server);
 connectDB()
   .then(() => {
     console.log("Database connected successfully");
-    server.listen(process.env.PORT, () => {
-      console.log(`Server running on port ${process.env.PORT}`);
+
+    server.listen(process.env.PORT || 5000, () => {
+      console.log(`Server running on port ${process.env.PORT || 5000}`);
     });
   })
   .catch((err) => {
