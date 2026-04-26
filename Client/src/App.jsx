@@ -17,20 +17,32 @@ function App() {
       <BrowserRouter>
         <Routes>
 
-          {/* 🔓 PUBLIC ROUTES */}
+          {/* 🔓 PUBLIC */}
           <Route path="/" element={<Login />} />
 
-          {/* 🔐 PROTECTED ROUTES */}
+          {/* 🔐 PROTECTED */}
           <Route path="/home" element={<Body />}>
+
+            {/* DEFAULT → FEED */}
             <Route index element={<Feed />} />
-            <Route path="edit-profile" element={<EditProfile />} />
+
+            {/* PROFILE VIEW */}
             <Route path="profile" element={<Profile />} />
+
+            {/* EDIT PROFILE */}
+            <Route path="edit-profile" element={<EditProfile />} />
+
+            {/* OTHER FEATURES */}
             <Route path="requests" element={<Requests />} />
             <Route path="connections" element={<Connections />} />
             <Route path="chat/:targetUserId" element={<Chat />} />
+
+            {/* 🔁 UNKNOWN INSIDE /home */}
+            <Route path="*" element={<Navigate to="/home" />} />
+
           </Route>
 
-          {/* 🔁 DEFAULT REDIRECT */}
+          {/* 🔁 GLOBAL FALLBACK */}
           <Route path="*" element={<Navigate to="/" />} />
 
         </Routes>

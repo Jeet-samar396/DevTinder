@@ -12,12 +12,12 @@ const EditProfile = () => {
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
-  const [photo, setPhoto] = useState(null); // 🔥 changed
+  const [photo, setPhoto] = useState(null);
   const [photoUrl, setPhotoUrl] = useState("");
   const [age, setAge] = useState("");
   const [gender, setGender] = useState("");
   const [about, setAbout] = useState("");
-  const [skills, setSkills] = useState("");
+  const [skills, setSkills] = useState([]);
 
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -30,9 +30,12 @@ const EditProfile = () => {
       setAge(user.age || "");
       setGender(user.gender || "");
       setAbout(user.about || "");
-      setSkills(user.skills?.join(", ") || "");
+      setSkills(user.skills || []);
     }
   }, [user]);
+
+  // 🔥 Preview fix
+  const previewUrl = photo ? URL.createObjectURL(photo) : photoUrl;
 
   const handleSave = async () => {
     try {
@@ -45,10 +48,7 @@ const EditProfile = () => {
       formData.append("age", age);
       formData.append("gender", gender);
       formData.append("about", about);
-      formData.append(
-        "skills",
-        JSON.stringify(skills.split(",").map((s) => s.trim()))
-      );
+      formData.append("skills", JSON.stringify(skills));
 
       if (photo) {
         formData.append("photo", photo);
@@ -73,6 +73,7 @@ const EditProfile = () => {
   return (
     <div className="flex flex-col md:flex-row justify-center my-10 gap-10 px-4">
 
+      {/* FORM */}
       <div className="card bg-base-300 w-full max-w-md p-5">
         <h2 className="text-xl font-bold text-center mb-4">
           Edit Profile
@@ -127,13 +128,27 @@ const EditProfile = () => {
           onChange={(e) => setAbout(e.target.value)}
         />
 
-        <input
-          type="text"
-          placeholder="Skills (comma separated)"
-          className="input input-bordered my-2"
+        {/* 🔥 SKILLS MULTI SELECT */}
+        <select
+          className="select select-bordered my-2 h-32"
+          multiple
           value={skills}
-          onChange={(e) => setSkills(e.target.value)}
-        />
+          onChange={(e) => {
+            const selected = Array.from(e.target.selectedOptions).map(
+              (opt) => opt.value
+            );
+            setSkills(selected);
+          }}
+        >
+          <option value="JavaScript">JavaScript</option>
+          <option value="React">React</option>
+          <option value="Node.js">Node.js</option>
+          <option value="MongoDB">MongoDB</option>
+          <option value="Express">Express</option>
+          <option value="C++">C++</option>
+          <option value="Python">Python</option>
+          <option value="Java">Java</option>
+        </select>
 
         {error && <p className="text-red-500 text-center">{error}</p>}
         {success && <p className="text-green-500 text-center">{success}</p>}
@@ -148,11 +163,11 @@ const EditProfile = () => {
         user={{
           firstName,
           lastName,
-          photoUrl,
+          photoUrl: previewUrl,
           age,
           gender,
           about,
-          skills: skills.split(","),
+          skills,
         }}
       />
     </div>
